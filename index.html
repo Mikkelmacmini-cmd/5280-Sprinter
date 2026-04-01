@@ -1290,16 +1290,45 @@
             .logo img { height: 36px; }
 
             /* Hero */
-            .hero { padding: 0 20px; align-items: flex-end; }
-
-            .hero-content {
-                padding-bottom: 70px;
-                gap: 16px;
+            .hero {
+                padding: 0 24px;
+                align-items: center;
+                justify-content: center;
+                height: 100svh;
             }
 
-            .hero-title { font-size: 44px; }
+            .hero-image {
+                object-position: center 30%;
+            }
 
-            .hero-meta h2 { font-size: 14px; }
+            /* Simpler vignette on mobile — no radial tunnel */
+            .hero-vignette {
+                background:
+                    linear-gradient(to bottom, rgba(8,8,8,0.6) 0%, transparent 25%),
+                    linear-gradient(to top, var(--bg) 0%, transparent 45%),
+                    rgba(8,8,8,0.45);
+            }
+
+            .hero-content {
+                padding-bottom: 80px;
+                gap: 20px;
+                align-items: center;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 42px;
+                line-height: 1.05;
+            }
+
+            .hero-meta {
+                gap: 20px;
+            }
+
+            .hero-meta h2 {
+                font-size: 15px;
+                line-height: 1.65;
+            }
 
             .spec-strip {
                 left: 20px;
@@ -1521,7 +1550,7 @@
         <!-- HERO -->
         <section class="hero">
             <picture>
-                <source media="(max-width: 768px)" srcset="Images/5280_Hero_mobile.webp" type="image/webp">
+                <source media="(max-width: 768px)" srcset="Images/5280_Hero_portrait.webp" type="image/webp">
                 <source srcset="Images/5280_Hero.webp" type="image/webp">
                 <img src="Images/5280_Hero.png" alt="5280 Sprinter Service" class="hero-image" decoding="async" fetchpriority="high">
             </picture>
