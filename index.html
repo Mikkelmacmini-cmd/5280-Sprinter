@@ -1281,12 +1281,15 @@
             /* ── HEADER ── */
             header {
                 padding: 14px 20px;
-                grid-template-columns: auto 1fr auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
             .nav-left { display: none; }
             .nav-right { display: none; }
-            .nav-toggle { display: flex; }
-            .logo img { height: 34px; }
+            .nav-toggle { display: flex; order: 2; }
+            .logo { order: 1; }
+            .logo img { height: 44px; }
 
             /* ── HERO ── */
             .hero {
