@@ -444,6 +444,10 @@
     .hero-body { padding: 4px 18px 28px; }
     .hero-van { max-height: none; max-width: 96vw; width: 100%; }
   }
+  @media (max-width: 600px) {
+    /* mobile only: break the highlighted phrase onto its own centered line */
+    h1.headline .hi { display: block; }
+  }
   @media (max-width: 520px) {
     .header { padding: 12px 18px; }
     .ticker { letter-spacing: 1.5px; font-size: 11px; }
