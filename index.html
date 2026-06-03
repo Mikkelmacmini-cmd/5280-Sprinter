@@ -443,10 +443,10 @@
     /* hero background fills the viewport; footer stays below the fold */
     .hero { min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     .hero-head { flex: 0 0 auto; }
-    /* van drops to the bottom of the fold with a large buffer below the CTA */
-    .hero-body { flex: 1 1 auto; min-height: 0; padding: 30px 0 0; align-items: flex-end; }
+    /* van drops to the bottom of the fold with a small buffer below the CTA */
+    .hero-body { flex: 1 1 auto; min-height: 0; padding: 12px 0 0; align-items: flex-end; }
     /* larger van: full-bleed (slightly past the screen edges, which crop off) */
-    .hero-van { width: 112vw; max-width: 112vw; height: auto; margin: 0 auto; }
+    .hero-van { width: 122vw; max-width: 122vw; height: auto; margin: 0 auto; }
   }
   @media (max-width: 600px) {
     /* mobile only: break the highlighted phrase onto its own centered line */
