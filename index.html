@@ -72,6 +72,8 @@
   }
 
   /* logo centered above the stars (used exactly as provided) */
+  .hero-logo-link { display: inline-block; line-height: 0; transition: opacity .15s; }
+  .hero-logo-link:hover { opacity: .85; }
   .hero-logo { height: clamp(120px, 14vw, 190px); width: auto; display: block; margin: 0 auto 12px; }
 
   .eyebrow {
@@ -470,7 +472,9 @@
 
     <!-- Centered headline at the top -->
     <div class="hero-head">
-      <img class="hero-logo" src="5280-logo.svg" alt="5280 Sprinter Service" />
+      <a class="hero-logo-link" href="https://www.5280sprinterservice.com" target="_blank" rel="noopener" aria-label="5280 Sprinter Service home page">
+        <img class="hero-logo" src="5280-logo.svg" alt="5280 Sprinter Service" />
+      </a>
 
       <div class="stars-row">
         <span class="stars">★★★★★</span>
