@@ -440,7 +440,9 @@
 
   /* ---------- Responsive ---------- */
   @media (max-width: 940px) {
-    .hero { min-height: 0; display: block; overflow: visible; }
+    /* fill the viewport with the hero background so the (white) footer
+       stays below the fold until the user scrolls */
+    .hero { min-height: 100vh; display: block; overflow: visible; }
     .hero-body { padding: 4px 18px 28px; }
     .hero-van { max-height: none; max-width: 96vw; width: 100%; }
   }
