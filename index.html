@@ -45,6 +45,20 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
+  /* full-page background image (fixed) sits behind the whole page,
+     so the skyline shows through the hero AND the footer — no white gaps.
+     Overlay lightened so the mountains read through more clearly. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(180deg, rgba(247,249,251,.86) 0%, rgba(247,249,251,.62) 42%, rgba(244,245,247,.34) 100%),
+      url("5280-landing-bg.png");
+    background-size: cover;
+    background-position: center;
+  }
 
   /* ===================== HERO (above the fold) ===================== */
   .hero {
@@ -53,11 +67,7 @@
     min-height: 100vh;            /* keep everything above the fold */
     display: flex;
     flex-direction: column;
-    background-image:
-      linear-gradient(180deg, rgba(247,249,251,.97) 0%, rgba(247,249,251,.84) 42%, rgba(244,245,247,.5) 100%),
-      url("5280-landing-bg.png");
-    background-size: cover;
-    background-position: center;
+    /* background now lives on body::before (full-page fixed layer) */
   }
 
   /* --- Centered headline block at the top --- */
@@ -246,8 +256,7 @@
 
   /* ---------- Footer (watermark) ---------- */
   .site-footer {
-    background: #fff;
-    border-top: 1px solid var(--navy-line);
+    background: transparent;      /* show the full-page background image through */
     padding: 40px 24px;
     display: flex;
     flex-direction: column;
