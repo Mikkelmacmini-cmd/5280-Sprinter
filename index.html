@@ -243,6 +243,15 @@
   .consent input { margin-top: 1px; flex: 0 0 auto; width: 16px; height: 16px; accent-color: var(--blue); }
   .consent.show-error { color: var(--red); }
 
+  /* Honeypot — visually removed but present in the DOM for bots */
+  .hp-field { position: absolute !important; left: -9999px !important; top: -9999px !important;
+    width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+  /* Server/network error banner inside the form */
+  .form-error { display: none; background: #fdf2f2; border: 1px solid #eebcbc; color: var(--red);
+    font-size: 13px; font-weight: 600; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
+  .form-error.show { display: block; }
+
   .cta {
     width: 100%; padding: 16px; font-size: 16px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;
     color: #fff; background: var(--blue); border: none; border-radius: 9px; cursor: pointer;
@@ -535,6 +544,12 @@
           <h2 class="win-center">Apply in 60 seconds</h2>
           <p class="win-sub win-center">Drop in your details and we'll reach out to schedule an interview.</p>
 
+          <!-- Honeypot: hidden from humans; bots that fill it are silently dropped -->
+          <input type="text" name="company" id="hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <!-- Server/network error banner -->
+          <div class="form-error" id="formError" role="alert"></div>
+
           <div class="form-row">
             <div class="field" data-field>
               <input type="text" name="fullName" id="fullName" placeholder="Full Name*" autocomplete="name" required />
@@ -554,19 +569,18 @@
           <div class="field" data-field>
             <select name="position" id="position" required>
               <option value="">Position interested in*</option>
-              <option value="Sprinter Technician">Sprinter Technician</option>
-              <option value="Service Advisor">Service Advisor</option>
+              <!-- options are loaded dynamically from /.netlify/functions/get-positions -->
             </select>
             <span class="error-msg">Please choose a position.</span>
           </div>
 
-          <!-- Resume upload (optional). Accepts pdf/doc/docx only. -->
+          <!-- Resume upload (required). Accepts pdf/doc/docx, max 4MB. -->
           <div class="field">
             <div class="file-upload">
-              <input type="file" id="resume" name="resume"
+              <input type="file" id="resume" name="resume" required
                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
               <label for="resume" class="file-label">
-                <span>📎</span> Attach resume <span style="color:var(--muted);font-weight:500;">(optional · PDF/DOC, 10MB)</span>
+                <span>📎</span> Attach resume <span style="color:var(--muted);font-weight:500;">(required · PDF/DOC, max 4MB)</span>
               </label>
               <div class="file-name" id="fileName"></div>
             </div>
@@ -600,7 +614,7 @@
   /* ============================================================
      Form logic: validation, file handling, submit.
      ============================================================ */
-  var MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+  var MAX_FILE_BYTES = 4 * 1024 * 1024; // 4 MB (Netlify payload ceiling)
   var ALLOWED_EXT = ["pdf", "doc", "docx"];
 
   var form        = document.getElementById("applyForm");
@@ -624,7 +638,7 @@
     }
     if (file.size > MAX_FILE_BYTES) {
       fileNameEl.classList.add("error");
-      fileNameEl.textContent = "That file is over 10MB. Please upload a smaller resume.";
+      fileNameEl.textContent = "That file is over 4MB. Please upload a smaller resume.";
       resumeInput.value = ""; return;
     }
     var sizeKB = (file.size / 1024).toFixed(0);
@@ -641,9 +655,25 @@
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function validPhone(v) { return v.replace(/\D/g, "").length >= 10; }
 
-  /* ---- Submit ---- */
+  /* ---- error banner + submitting state ---- */
+  var formError   = document.getElementById("formError");
+  var submitBtn   = form.querySelector('button[type="submit"]');
+  var submitLabel = submitBtn ? submitBtn.querySelector("span") : null;
+  function showFormError(msg) { formError.textContent = msg; formError.classList.add("show"); }
+  function clearFormError() { formError.textContent = ""; formError.classList.remove("show"); }
+  function setSubmitting(on) {
+    if (submitBtn) submitBtn.disabled = on;
+    if (submitLabel) submitLabel.textContent = on ? "Sending…" : "Submit";
+  }
+  function fieldWrapByName(name) {
+    var el = form.querySelector('[name="' + name + '"]');
+    return el ? el.closest("[data-field]") : null;
+  }
+
+  /* ---- Submit: validate, then POST to the Netlify Function ---- */
   form.addEventListener("submit", function (e) {
     e.preventDefault();
+    clearFormError();
     var ok = true;
 
     form.querySelectorAll("[data-field]").forEach(function (field) {
@@ -661,36 +691,45 @@
     consentWrap.classList.toggle("show-error", !consent.checked);
     if (!consent.checked) ok = false;
 
+    // resume is required
+    if (!resumeInput.files.length) {
+      fileNameEl.className = "file-name error";
+      fileNameEl.textContent = "Please attach your resume (PDF, DOC, or DOCX).";
+      ok = false;
+    }
+
     if (!ok) {
       var firstBad = form.querySelector(".show-error input, .show-error select");
       if (firstBad) firstBad.focus();
       return;
     }
 
-    /* ========================================================
-       >>> WIRE UP YOUR BACKEND / EMAIL HANDLER HERE <<<
-       --------------------------------------------------------
-       Plain HTML can't store files or send email on its own.
-       Because there's a file upload, send as multipart/form-data:
-
-         var data = new FormData(form);
-         // includes: fullName, phone, email, position, consent,
-         // and the resume File (if chosen).
-         fetch("https://your-endpoint.example/apply", {
-           method: "POST",
-           body: data
-         })
-         .then(function (r) { return r.json(); })
-         .then(function () { showSuccess(); })
-         .catch(function () { alert("Something went wrong — please call (720) 807-3353."); });
-
-       Endpoint options: a serverless function (Netlify/Vercel/Lambda),
-       Formspree/Formcarry (support file uploads), or your own server
-       that emails info@5280sprinterservice.com and stores the resume.
-       ======================================================== */
-
-    // For now (no backend), just show the success state:
-    showSuccess();
+    // Send as multipart/form-data (FormData carries the fields + resume File
+    // + the honeypot). The function emails it via Resend and returns JSON.
+    setSubmitting(true);
+    fetch("/.netlify/functions/apply", { method: "POST", body: new FormData(form) })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j || {} }; }); })
+      .then(function (res) {
+        if (res.status === 200 && res.body.ok) { showSuccess(); return; }
+        setSubmitting(false);
+        // surface any per-field errors the server returned
+        if (res.body.fields) {
+          Object.keys(res.body.fields).forEach(function (name) {
+            if (name === "resume") {
+              fileNameEl.className = "file-name error";
+              fileNameEl.textContent = res.body.fields[name];
+            } else {
+              var wrap = fieldWrapByName(name);
+              if (wrap) setError(wrap, true);
+            }
+          });
+        }
+        showFormError(res.body.error || "Something went wrong. Please try again.");
+      })
+      .catch(function () {
+        setSubmitting(false);
+        showFormError("Network error — please try again, or call (720) 807-3353.");
+      });
   });
 
   function showSuccess() {
@@ -730,6 +769,24 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
   });
+
+  /* ============================================================
+     Load the active positions into the dropdown from the backend.
+     ============================================================ */
+  (function loadPositions() {
+    fetch("/.netlify/functions/get-positions")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var sel = document.getElementById("position");
+        (d.positions || []).forEach(function (p) {
+          var o = document.createElement("option");
+          o.value = p.title;
+          o.textContent = p.title;
+          sel.appendChild(o);
+        });
+      })
+      .catch(function () { /* if it fails, the placeholder stays; form still renders */ });
+  })();
 </script>
 </body>
 </html>

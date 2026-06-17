@@ -1,0 +1,16 @@
+# Netlify configuration for the 5280 Sprinter hiring site
+[build]
+  # The site is static HTML at the repo root.
+  publish = "."
+  # Serverless functions live here.
+  functions = "netlify/functions"
+
+[functions]
+  # Bundle function dependencies (resend, @netlify/blobs, etc.) with esbuild.
+  node_bundler = "esbuild"
+
+# Let /admin resolve to the admin app without a trailing slash.
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200

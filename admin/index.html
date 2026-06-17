@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Admin — 5280 Sprinter Hiring</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --muted: #5c6470; --line: #e2e5ea; --bg: #f4f5f7;
+    --blue: #0174c7; --blue-dark: #015fa3; --green: #1f9d57; --red: #cb3837;
+    --font: "Inter","Helvetica Neue","Segoe UI",Arial,sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  .topbar { background: #fff; border-bottom: 1px solid var(--line); padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .3px; }
+  .brand .gear { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 50%; background: var(--blue); color: #fff; font-size: 11px; font-weight: 800; }
+  .brand small { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; color: var(--blue); text-transform: uppercase; }
+  .logout { display: none; border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; font-size: 13px; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+  .logout:hover { border-color: var(--blue); color: var(--blue); }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 30px 20px 60px; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(15,30,50,.06); padding: 26px; margin-bottom: 22px; }
+  .card h2 { font-size: 18px; margin-bottom: 4px; }
+  .card .sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+  label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  input[type=text], input[type=email], input[type=password] {
+    width: 100%; padding: 12px 14px; font-size: 15px; font-family: inherit;
+    border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
+  }
+  input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(1,116,199,.18); }
+  .row { margin-bottom: 14px; }
+
+  .btn { border: none; background: var(--blue); color: #fff; font-weight: 800; font-size: 14px; letter-spacing: .4px;
+         padding: 12px 20px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+  .btn:hover { background: var(--blue-dark); }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn-sm { padding: 7px 13px; font-size: 12.5px; border-radius: 7px; }
+  .btn-ghost { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: #f0f3f7; border-color: #c9d0d9; }
+  .btn-danger { background: #fff; border: 1px solid #eebcbc; color: var(--red); }
+  .btn-danger:hover { background: #fdf2f2; }
+
+  .msg { font-size: 13px; font-weight: 600; margin-top: 12px; display: none; }
+  .msg.ok { color: var(--green); display: block; }
+  .msg.err { color: var(--red); display: block; }
+
+  /* login view */
+  #loginView { max-width: 400px; margin: 8vh auto 0; }
+
+  /* positions list */
+  .pos-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+  .pos-item { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .pos-title { font-weight: 700; flex: 1 1 auto; }
+  .badge { font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; padding: 4px 9px; border-radius: 50px; }
+  .badge.active { background: rgba(31,157,87,.12); color: var(--green); }
+  .badge.hidden { background: rgba(92,100,112,.14); color: var(--muted); }
+  .pos-actions { display: flex; gap: 7px; flex-shrink: 0; }
+  .add-row { display: flex; gap: 10px; }
+  .add-row input { flex: 1 1 auto; }
+  .empty { color: var(--muted); font-size: 14px; padding: 8px 0 16px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="gear">5280</span>
+      <span>Hiring Admin<small>Sprinter Service</small></span>
+    </div>
+    <button class="logout" id="logoutBtn">Log out</button>
+  </div>
+
+  <!-- ===================== LOGIN ===================== -->
+  <div class="wrap" id="loginView" style="display:none">
+    <div class="card">
+      <h2>Admin sign in</h2>
+      <p class="sub">Enter your email and password to manage the hiring form.</p>
+      <form id="loginForm">
+        <div class="row">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" autocomplete="username" required />
+        </div>
+        <div class="row">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required />
+        </div>
+        <button class="btn" type="submit" id="loginBtn" style="width:100%">Sign in</button>
+        <p class="msg" id="loginMsg"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div class="wrap" id="dashView" style="display:none">
+
+    <!-- Destination email -->
+    <div class="card">
+      <h2>Where applications are sent</h2>
+      <p class="sub">Applications (with the resume attached) are emailed here. Separate multiple addresses with commas.</p>
+      <form id="emailForm">
+        <div class="row">
+          <label for="destEmail">Destination email(s)</label>
+          <input type="text" id="destEmail" placeholder="owner@example.com, manager@example.com" />
+          <p class="hint" id="destHint"></p>
+        </div>
+        <button class="btn" type="submit" id="emailBtn">Save email</button>
+        <p class="msg" id="emailMsg"></p>
+      </form>
+    </div>
+
+    <!-- Positions -->
+    <div class="card">
+      <h2>Open positions</h2>
+      <p class="sub">These appear in the "Position interested in" dropdown. Hidden ones stay saved but don't show on the form.</p>
+      <ul class="pos-list" id="posList"></ul>
+      <form id="addForm">
+        <label for="newPos">Add a position</label>
+        <div class="add-row">
+          <input type="text" id="newPos" placeholder="e.g. Diesel Technician" maxlength="80" />
+          <button class="btn" type="submit" id="addBtn">Add</button>
+        </div>
+        <p class="msg" id="posMsg"></p>
+      </form>
+    </div>
+  </div>
+
+<script>
+  /* ---------- tiny fetch helper (cookies sent automatically, same-origin) ---------- */
+  async function api(path, opts) {
+    const res = await fetch('/.netlify/functions/' + path, Object.assign({ headers: {} }, opts));
+    let body = {};
+    try { body = await res.json(); } catch (e) {}
+    return { status: res.status, body };
+  }
+  function postJSON(path, data) {
+    return api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  }
+  function showMsg(el, text, ok) { el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'err'); }
+
+  var loginView = document.getElementById('loginView');
+  var dashView  = document.getElementById('dashView');
+  var logoutBtn = document.getElementById('logoutBtn');
+
+  function showLogin() {
+    loginView.style.display = 'block';
+    dashView.style.display = 'none';
+    logoutBtn.style.display = 'none';
+  }
+  function showDash() {
+    loginView.style.display = 'none';
+    dashView.style.display = 'block';
+    logoutBtn.style.display = 'inline-block';
+    loadSettings();
+    loadPositions();
+  }
+
+  /* ---------- decide initial view by probing an authed endpoint ---------- */
+  (async function init() {
+    var r = await api('list-positions');
+    if (r.status === 200) showDash(); else showLogin();
+  })();
+
+  /* ---------- login ---------- */
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('loginBtn');
+    var msg = document.getElementById('loginMsg');
+    btn.disabled = true; btn.textContent = 'Signing in…'; msg.className = 'msg';
+    var r = await postJSON('login', {
+      email: document.getElementById('loginEmail').value,
+      password: document.getElementById('loginPassword').value,
+    });
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (r.status === 200 && r.body.ok) { showDash(); }
+    else { showMsg(msg, r.body.error || 'Sign in failed.', false); }
+  });
+
+  /* ---------- logout ---------- */
+  logoutBtn.addEventListener('click', async function () {
+    await postJSON('logout', {});
+    document.getElementById('loginPassword').value = '';
+    showLogin();
+  });
+
+  /* ---------- destination email ---------- */
+  async function loadSettings() {
+    var r = await api('get-settings');
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200) {
+      document.getElementById('destEmail').value = r.body.destinationEmail || '';
+      document.getElementById('destHint').textContent = r.body.usingDefault
+        ? 'Currently using the DEFAULT_TO_EMAIL fallback — save a value to override it.'
+        : '';
+    }
+  }
+  document.getElementById('emailForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('emailBtn');
+    var msg = document.getElementById('emailMsg');
+    btn.disabled = true; msg.className = 'msg';
+    var r = await postJSON('update-settings', { destinationEmail: document.getElementById('destEmail').value });
+    btn.disabled = false;
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200 && r.body.ok) {
+      document.getElementById('destEmail').value = r.body.destinationEmail;
+      document.getElementById('destHint').textContent = '';
+      showMsg(msg, 'Saved.', true);
+    } else {
+      showMsg(msg, r.body.error || 'Could not save.', false);
+    }
+  });
+
+  /* ---------- positions ---------- */
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+
+  function renderPositions(positions) {
+    var list = document.getElementById('posList');
+    list.innerHTML = '';
+    if (!positions.length) {
+      list.innerHTML = '<li class="empty">No positions yet — add one below.</li>';
+      return;
+    }
+    positions.forEach(function (p) {
+      var li = document.createElement('li');
+      li.className = 'pos-item';
+      var isActive = p.status === 'active';
+      li.innerHTML =
+        '<span class="pos-title">' + escapeHtml(p.title) + '</span>' +
+        '<span class="badge ' + (isActive ? 'active' : 'hidden') + '">' + (isActive ? 'Active' : 'Hidden') + '</span>' +
+        '<span class="pos-actions">' +
+          '<button class="btn btn-sm btn-ghost" data-act="toggle">' + (isActive ? 'Hide' : 'Unhide') + '</button>' +
+          '<button class="btn btn-sm btn-danger" data-act="delete">Delete</button>' +
+        '</span>';
+      li.querySelector('[data-act=toggle]').addEventListener('click', function () { togglePos(p.id); });
+      li.querySelector('[data-act=delete]').addEventListener('click', function () { deletePos(p); });
+      list.appendChild(li);
+    });
+  }
+
+  async function loadPositions() {
+    var r = await api('list-positions');
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200) renderPositions(r.body.positions || []);
+  }
+
+  document.getElementById('addForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var input = document.getElementById('newPos');
+    var btn = document.getElementById('addBtn');
+    var msg = document.getElementById('posMsg');
+    var title = input.value.trim();
+    msg.className = 'msg';
+    if (!title) { showMsg(msg, 'Enter a position title.', false); return; }
+    btn.disabled = true;
+    var r = await postJSON('add-position', { title: title });
+    btn.disabled = false;
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200 && r.body.ok) { input.value = ''; renderPositions(r.body.positions); showMsg(msg, 'Added.', true); }
+    else { showMsg(msg, r.body.error || 'Could not add.', false); }
+  });
+
+  async function togglePos(id) {
+    var msg = document.getElementById('posMsg'); msg.className = 'msg';
+    var r = await postJSON('toggle-position', { id: id });
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200 && r.body.ok) renderPositions(r.body.positions);
+    else showMsg(msg, r.body.error || 'Could not update.', false);
+  }
+
+  async function deletePos(p) {
+    var msg = document.getElementById('posMsg'); msg.className = 'msg';
+    if (!window.confirm('Permanently delete "' + p.title + '"? This cannot be undone.')) return;
+    var r = await postJSON('delete-position', { id: p.id });
+    if (r.status === 401) { showLogin(); return; }
+    if (r.status === 200 && r.body.ok) { renderPositions(r.body.positions); showMsg(msg, 'Deleted.', true); }
+    else showMsg(msg, r.body.error || 'Could not delete.', false);
+  }
+</script>
+</body>
+</html>

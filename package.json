@@ -1,0 +1,14 @@
+{
+  "name": "5280-sprinter-hiring",
+  "version": "1.0.0",
+  "private": true,
+  "description": "5280 Sprinter Service hiring landing page + Netlify Functions backend (Resend email, Netlify Blobs storage, admin area).",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0",
+    "parse-multipart-data": "^1.5.0",
+    "resend": "^4.0.1"
+  }
+}

@@ -1,4 +1,13 @@
+# dependencies
+node_modules/
+
+# secrets / local env
+.env
+.env.*
+!.env.example
+
+# netlify
+.netlify/
+
+# os / editor cruft
 .DS_Store
-Images/.DS_Store
-5280 Sprinter Website
-5280.mov
