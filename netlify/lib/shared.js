@@ -102,7 +102,17 @@ const isEmail = (v) => typeof v === 'string' && EMAIL_RE.test(v.trim());
 // immediately.
 async function getSettingsStore() {
   const { getStore } = await import('@netlify/blobs');
-  return getStore({ name: 'settings', consistency: 'strong' });
+  const options = { name: 'settings', consistency: 'strong' };
+  // Some Netlify deploy contexts don't auto-inject the Blobs environment
+  // (MissingBlobsEnvironmentError). If explicit credentials are provided,
+  // use them; otherwise fall back to Netlify's automatic configuration.
+  const siteID = process.env.NETLIFY_BLOBS_SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN;
+  if (siteID && token) {
+    options.siteID = siteID;
+    options.token = token;
+  }
+  return getStore(options);
 }
 
 const defaultPositions = () => [
